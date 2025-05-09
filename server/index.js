@@ -9,8 +9,7 @@ import userRoute from "./routes/user.routes.js"
 import rideRoute from "./routes/ride.routes.js"
 
 const app = express()
-const PORT = 8080;
-
+const PORT = 5000;
 dotenv.config()
 
 const connectDB = (url) => {
@@ -26,12 +25,16 @@ const connectDB = (url) => {
 app.use(cors({
     origin: process.env.ORIGIN,
     credentials: true,
+
     // allowedMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
   }
 ))
 app.use(cookieParser())
 app.use(express.json())
-
+app.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+  next();
+});
 app.use("/api/users", userRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/rides", rideRoute);

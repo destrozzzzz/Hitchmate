@@ -97,7 +97,7 @@ const RideDetail = () => {
                 </div>
               </div>
               <div className="flex justify-center items-start flex-col space-y-4 mt-8">
-                <p className="text-base font-semibold leading-4 text-center md:text-left">About John</p>
+                <p className="text-base font-semibold leading-4 text-center md:text-left">About {data?.creator.name}</p>
                 <p className="text-sm text-muted-foreground">{data?.creator.age} y/o</p>
                 <p className="text-sm text-muted-foreground">{data?.creator.ridesCreated?.length} Rides published</p>
                 <p className="text-sm text-muted-foreground">Member since {data?.createdAt.substring(0, 4)}</p>

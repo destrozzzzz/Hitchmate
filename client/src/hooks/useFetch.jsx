@@ -2,7 +2,7 @@ import axios from "axios"
 import { useEffect, useState } from "react"
 
 const baseURL = import.meta.env.VITE_REACT_API_URI;
-// const baseURL = "http://localhost:8080/api";
+// const baseURL = "http://localhost:5000/api";
 
 const useFetch = (endpoint, includeCredentials = false) => {
   const [loading, setLoading] = useState(false)
