@@ -23,8 +23,8 @@ const rideSchema = new mongoose.Schema({
       required: true,
     },
     coordinates: {
-      type: [Number],
-    }, 
+      type: [Number], // [longitude, latitude]
+    },
   },
   destination: {
     place: {
@@ -61,17 +61,23 @@ const rideSchema = new mongoose.Schema({
       trim: true,
     },
   },
-  chat: [ 
+  chat: [
     {
       sender: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
+        required: true, // Ensures a sender is always specified
       },
-      message: String,
-      timestamp: Date,
+      message: {
+        type: String,
+        required: true, // Ensure every chat message has content
+      },
+      timestamp: {
+        type: Date,
+        default: Date.now, // Automatically sets the timestamp if not provided
+      },
     },
   ],
-}, {timestamps:true}
-);
+}, { timestamps: true });
 
 export default mongoose.model('Ride', rideSchema);

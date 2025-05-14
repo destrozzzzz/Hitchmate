@@ -16,7 +16,7 @@ const Header = () => {
 
   const handleLogout = async () => {
     try{
-      await axios.get(`${apiUri}/auth/logout`, {withCredentials: true});
+      await axios.post(`${apiUri}/auth/logout`, {}, { withCredentials: true });
       dispatch({ type: 'LOGOUT' });
       navigate("/");
     }catch(err){

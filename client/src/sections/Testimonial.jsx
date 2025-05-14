@@ -23,7 +23,7 @@ const Testimonial = () => {
   ]
   return (
     <section className="text-muted-foreground container py-16 max-w-screen-xl body-font">
-        <h2 className="text-4xl font-bold text-primary mb-12 text-center">What Pepole Say About Us</h2>
+        <h2 className="text-4xl font-bold text-primary mb-12 text-center">What People Say About Us</h2>
         <div className="flex flex-wrap -m-4">
           {feedback.map(t => 
             <div key={t.user} className="p-4 md:w-1/3 w-full">
