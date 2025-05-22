@@ -1,6 +1,5 @@
 import express from "express";
 import { login, logout, register } from "../controllers/auth.js";
-import { verifyToken } from "../utils/verifyToken.js";
 
 const router = express.Router()
 
