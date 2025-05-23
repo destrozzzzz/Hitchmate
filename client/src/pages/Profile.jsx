@@ -14,14 +14,14 @@ import axios from "axios"
 import { Pencil, Star, Trash } from "lucide-react"
 import { Fragment, useContext, useState, useEffect } from "react"
 import { Controller, useForm } from "react-hook-form"
-import { Navigate } from "react-router-dom"
+import { Navigate, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 const apiUri = import.meta.env.VITE_REACT_API_URI
 
 const Profile = () => {
   const { user } = useContext(AuthContext)
-
+  const navigate = useNavigate()
   const [rideDeleteMode, setRideDeleteMode] = useState(false)
   const [editMode, setEditMode] = useState(false)
   const { loading, data, refetch } = useFetch(`users/${user.user._id}`, true)
@@ -90,15 +90,15 @@ const Profile = () => {
       <div className="flex flex-col sm:flex-row h-full w-full">
         <div className="w-full sm:w-96 flex p-0 py-6 md:p-6 xl:p-8 flex-col">
           <div className="relative flex w-full space-x-4 my-8">
-            {loading ? 
+            {loading ? (
               <div className="flex items-center space-x-4">
                 <Skeleton className="h-12 w-12 rounded-full" />
                 <div className="space-y-2">
                   <Skeleton className="h-4 w-[250px]" />
                   <Skeleton className="h-4 w-[200px]" />
                 </div>
-              </div> 
-              : 
+              </div>
+            ) : (
               <>
                 <Avatar>
                   <AvatarImage src={data?.profilePicture} />
@@ -120,13 +120,32 @@ const Profile = () => {
                 </DropdownMenu>
                 <div className="flex justify-center items-start flex-col space-y-2">
                   <p className="text-base font-semibold leading-4 text-left">{data?.name}</p>
-                  <div className="flex items-center text-sm gap-1 text-muted-foreground"><Star fill="yellow" size={20} className="text-transparent" /> {data?.stars} - {data?.ratings.length} ratings</div>
+                  <div className="flex items-center text-sm gap-1 text-muted-foreground">
+                    <Star fill="yellow" size={20} className="text-transparent" />
+                    {data?.stars} - {data?.ratings.length} ratings
+                  </div>
+
+                  {/* ✅ Show "KYC Verified" or "Complete KYC" button */}
+                  {data?.kycStatus === "verified" ? (
+                    <span className="text-green-600 text-sm font-semibold px-2 py-1 bg-green-100 rounded-full">
+                      KYC Verified
+                    </span>
+                  ) : (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="mt-2"
+                      onClick={() => navigate("/kyc")}
+                    >
+                      Complete KYC
+                    </Button>
+                  )}
                 </div>
               </>
-            }
+            )}
           </div>
-          
-          {!editMode ? 
+
+          {!editMode ? (
             <>
               <Button variant='outline' onClick={() => setEditMode(true)} >Edit Profile</Button>
               <div className="flex justify-center items-start flex-col space-y-4 mt-8">
@@ -143,7 +162,7 @@ const Profile = () => {
                 <p className="text-sm text-muted-foreground">{data?.profile.preferences?.petFriendly}</p>
               </div>
             </>
-            : 
+          ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
               <Label htmlFor="name">Name</Label>
               <Controller
@@ -205,7 +224,7 @@ const Profile = () => {
               <Button type="submit">Save</Button>
               <Button variant='outline' onClick={(e) => { e.preventDefault(); reset(); setEditMode(false) }}>Cancel</Button>
             </form>
-          }
+          )}
         </div>
 
         <div className="flex flex-col justify-start items-start gap-2 w-full sm:w-2/3">
