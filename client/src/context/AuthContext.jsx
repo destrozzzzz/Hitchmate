@@ -1,63 +1,76 @@
-import { createContext, useEffect, useReducer } from "react"
+import { createContext, useEffect, useReducer } from "react";
 
 const INITIAL_STATE = {
   user: JSON.parse(localStorage.getItem("user")) || null,
+  token: localStorage.getItem("token") || null,
   loading: false,
-  error: null
-}
+  error: null,
+};
 
 export const AuthContext = createContext(INITIAL_STATE);
 
 const AuthReducer = (state, action) => {
-  switch(action.type){
+  switch (action.type) {
     case "LOGIN_START":
-      return{
+      return {
+        ...state,
         user: null,
+        token: null,
         loading: true,
-        error: null
-      }
+        error: null,
+      };
     case "LOGIN_SUCCESS":
-      return{
-        user: action.payload,
+      localStorage.setItem("user", JSON.stringify(action.payload.user));
+      localStorage.setItem("token", action.payload.token);
+      return {
+        ...state,
+        user: action.payload.user,
+        token: action.payload.token,
         loading: false,
-        error: null
-      }
+        error: null,
+      };
     case "LOGIN_FAILED":
-      return{
+      return {
+        ...state,
         user: null,
+        token: null,
         loading: false,
-        error: action.payload
-      }
+        error: action.payload,
+      };
     case "LOGOUT":
-      localStorage.removeItem("user"); // Clear user data from local storage
-      return{
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      return {
+        ...state,
         user: null,
+        token: null,
         loading: false,
-        error: null
-      }
-    default: 
+        error: null,
+      };
+    default:
       return state;
   }
-}
+};
 
-export const AuthContextProvider = ({children}) => {
-  const [state, dispatch] = useReducer(AuthReducer, INITIAL_STATE)
+export const AuthContextProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(AuthReducer, INITIAL_STATE);
 
+  // This only needs to track user updates now
   useEffect(() => {
-    localStorage.setItem("user", JSON.stringify(state.user))
-  }, [state.user])
-  
+    localStorage.setItem("user", JSON.stringify(state.user));
+  }, [state.user]);
 
   return (
     <AuthContext.Provider
       value={{
         user: state.user,
+        token: state.token,
         loading: state.loading,
         error: state.error,
-        dispatch
+        dispatch,
       }}
     >
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};

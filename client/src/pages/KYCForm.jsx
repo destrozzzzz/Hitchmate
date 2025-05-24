@@ -13,12 +13,21 @@ const KYCForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      alert("You're not logged in. Please login first.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('http://localhost:5000/api/kyc/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ fullName, idNumber, photoUrl }),
       });
@@ -39,23 +48,41 @@ const KYCForm = () => {
     <div className="flex justify-center items-center min-h-screen bg-background">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader>
-          <h2 className="text-2xl font-semibold text-center">KYC Verification</h2>
+          <h2 className="text-2xl font-semibold text-center" id="kyc-title">KYC Verification</h2>
         </CardHeader>
-        <CardContent>
+        <CardContent aria-describedby="kyc-title">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="fullName">Full Name</Label>
-              <Input id="fullName" placeholder="Your full name" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
+              <Input
+                id="fullName"
+                placeholder="Your full name"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="idNumber">ID Number</Label>
-              <Input id="idNumber" placeholder="Your government ID number" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} required />
+              <Input
+                id="idNumber"
+                placeholder="Your government ID number"
+                value={idNumber}
+                onChange={(e) => setIdNumber(e.target.value)}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="photoUrl">Photo URL</Label>
-              <Input id="photoUrl" placeholder="Link to your photo ID" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} required />
+              <Input
+                id="photoUrl"
+                placeholder="Link to your photo ID"
+                value={photoUrl}
+                onChange={(e) => setPhotoUrl(e.target.value)}
+                required
+              />
             </div>
 
             <Button type="submit" disabled={loading} className="w-full">

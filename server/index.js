@@ -11,6 +11,8 @@ import authRoutes from './routes/auth.routes.js';
 import rideRoutes from './routes/ride.routes.js';
 import userRoutes from './routes/user.routes.js';
 import messageRoutes from './routes/message.routes.js'; // Import the message routes
+import kycRoutes from './routes/KycRoutes.js'; // ✅ NEW
+
 
 // Import Message model to save messages
 import Message from './models/Message.js'; // Make sure the path is correct
@@ -100,6 +102,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/rides', rideRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/messages', messageRoutes); // Use the message routes
+app.use('/api/kyc', kycRoutes); // ✅ NEW
+
+
 
 // === DB CONNECT & SERVER START ===
 mongoose

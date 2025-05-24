@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: {
     type: Boolean,
-    required: true,
     default: false,
   },
   phoneNumber: {
@@ -29,7 +28,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
-  age:{
+  age: {
     type: Number,
   },
   ridesCreated: [
@@ -48,15 +47,18 @@ const userSchema = new mongoose.Schema({
     bio: {
       type: String,
       trim: true,
+      default: '',
     },
     preferences: {
       smoking: {
         type: String,
-        enum: ['No preference', 'Smoke-free only', 'Okay with smoking'],
+        enum: ['No preference', 'Smoke-free only', 'Okay with smoking', 'yes', 'no'],
+        default: 'No preference',
       },
       music: {
         type: String,
-        enum: ['No preference', 'Quiet ride', 'Music welcome'],
+        enum: ['No preference', 'Quiet ride', 'Music welcome', 'rock', 'classical', 'pop'],
+        default: 'No preference',
       },
       petFriendly: {
         type: Boolean,
@@ -75,7 +77,6 @@ const userSchema = new mongoose.Schema({
       ref: 'Rating',
     },
   ],
-}, {timestamps: true}
-);
+}, { timestamps: true });
 
 export default mongoose.model("User", userSchema);

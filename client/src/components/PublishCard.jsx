@@ -15,14 +15,27 @@ import "../styles/datepicker.css"; // ✅ Import your custom styles
 
 const apiUri = import.meta.env.VITE_REACT_API_URI;
 
-const formSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  seat: z.number().min(1).max(10),
-  price: z.number().nonnegative(),
-  startTime: z.date().min(new Date(), "Start time must be in the future"),
-  endTime: z.date().min(new Date(), "End time must be in the future"),
-});
+const formSchema = z
+  .object({
+    from: z.string().min(1, "From is required"),
+    to: z.string().min(1, "To is required"),
+    seat: z.number().min(1).max(10),
+    price: z.number().nonnegative(),
+    startTime: z.date(),
+    endTime: z.date(),
+  })
+  .refine((data) => data.startTime > new Date(), {
+    message: "Start time must be in the future",
+    path: ["startTime"],
+  })
+  .refine((data) => data.endTime > new Date(), {
+    message: "End time must be in the future",
+    path: ["endTime"],
+  })
+  .refine((data) => data.endTime > data.startTime, {
+    message: "End time must be after start time",
+    path: ["endTime"],
+  });
 
 const PublishCard = () => {
   const form = useForm({
@@ -32,8 +45,8 @@ const PublishCard = () => {
       to: "",
       seat: 1,
       price: 0,
-      startTime: new Date(),
-      endTime: new Date(),
+      startTime: new Date(new Date().getTime() + 5 * 60 * 1000), // 5 mins ahead for better UX
+      endTime: new Date(new Date().getTime() + 10 * 60 * 1000), // 10 mins ahead
     },
   });
 
@@ -48,10 +61,19 @@ const PublishCard = () => {
         price: data.price,
       };
       await axios.post(`${apiUri}/rides`, body, { withCredentials: true });
-      toast("The ride has been Created");
-      form.reset();
+      toast.success("The ride has been created");
+      // Reset form with initial values including date resets
+      form.reset({
+        from: "",
+        to: "",
+        seat: 1,
+        price: 0,
+        startTime: new Date(new Date().getTime() + 5 * 60 * 1000),
+        endTime: new Date(new Date().getTime() + 10 * 60 * 1000),
+      });
     } catch (error) {
       console.error("POST request failed:", error);
+      toast.error("Failed to create ride. Please try again.");
     }
   };
 
@@ -99,11 +121,21 @@ const PublishCard = () => {
                     <FormLabel>Available seats</FormLabel>
                     <FormControl>
                       <div className="flex gap-2 items-center">
-                        <Button variant="outline" size="icon" type="button" onClick={() => field.value > 1 && field.onChange(field.value - 1)}>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          type="button"
+                          onClick={() => field.value > 1 && field.onChange(field.value - 1)}
+                        >
                           <Minus className="h-4 w-4" />
                         </Button>
                         <span>{field.value}</span>
-                        <Button variant="outline" size="icon" type="button" onClick={() => field.value < 10 && field.onChange(field.value + 1)}>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          type="button"
+                          onClick={() => field.value < 10 && field.onChange(field.value + 1)}
+                        >
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
@@ -119,7 +151,16 @@ const PublishCard = () => {
                   <FormItem className="flex flex-col space-y-1.5">
                     <FormLabel>Price</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="Price" min="0" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                      <Input
+                        type="number"
+                        placeholder="Price"
+                        min={0}
+                        {...field}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          field.onChange(isNaN(val) ? 0 : val);
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -136,12 +177,13 @@ const PublishCard = () => {
                   <FormControl>
                     <DatePicker
                       selected={field.value}
-                      onChange={(date) => field.onChange(date)}
+                      onChange={(date) => date && field.onChange(date)}
                       showTimeSelect
                       dateFormat="Pp"
                       className="w-full rounded-md border px-3 py-2 text-sm shadow-sm"
                       calendarClassName="custom-datepicker"
                       dayClassName={() => "custom-day"}
+                      minDate={new Date()}
                     />
                   </FormControl>
                   <FormMessage />
@@ -158,12 +200,13 @@ const PublishCard = () => {
                   <FormControl>
                     <DatePicker
                       selected={field.value}
-                      onChange={(date) => field.onChange(date)}
+                      onChange={(date) => date && field.onChange(date)}
                       showTimeSelect
                       dateFormat="Pp"
                       className="w-full rounded-md border px-3 py-2 text-sm shadow-sm"
                       calendarClassName="custom-datepicker"
                       dayClassName={() => "custom-day"}
+                      minDate={new Date()}
                     />
                   </FormControl>
                   <FormMessage />
