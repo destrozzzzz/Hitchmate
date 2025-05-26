@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const kycSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  userId: { type: String, default: 'anonymous-user' }, // now optional and just a string
   fullName: String,
   idNumber: String,
   photoUrl: String,

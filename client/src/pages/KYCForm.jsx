@@ -14,31 +14,42 @@ const KYCForm = () => {
     e.preventDefault();
     setLoading(true);
 
-    const token = localStorage.getItem('token');
-
-    if (!token) {
-      alert("You're not logged in. Please login first.");
-      setLoading(false);
-      return;
-    }
-
     try {
       const res = await fetch('http://localhost:5000/api/kyc/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ fullName, idNumber, photoUrl }),
       });
 
-      if (!res.ok) throw new Error("Failed to submit KYC");
+      const text = await res.text(); // Get raw response for debugging
+      if (!res.ok) {
+        console.error("Submission failed. Status:", res.status);
+        console.error("Response:", text);
 
-      const data = await res.json();
+        let errorMsg = "Submission failed.";
+        try {
+          const json = JSON.parse(text);
+          if (json.message) errorMsg = json.message;
+        } catch (parseError) {
+          // Not JSON - use raw text
+          errorMsg = text || errorMsg;
+        }
+
+        throw new Error(errorMsg);
+      }
+
+      const data = JSON.parse(text);
       alert(data.message || 'KYC Submitted Successfully!');
+
+      // Optional: Reset form
+      setFullName('');
+      setIdNumber('');
+      setPhotoUrl('');
     } catch (error) {
       console.error(error);
-      alert("Submission failed. Please try again.");
+      alert(error.message || "Submission failed. Please try again.");
     } finally {
       setLoading(false);
     }
