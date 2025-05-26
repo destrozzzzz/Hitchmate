@@ -11,7 +11,7 @@ import authRoutes from './routes/auth.routes.js';
 import rideRoutes from './routes/ride.routes.js';
 import userRoutes from './routes/user.routes.js';
 import messageRoutes from './routes/message.routes.js'; // Import the message routes
-import kycRoutes from './routes/KycRoutes.js'; // ✅ NEW
+import kycRoutes from './routes/kycRoutes.js'; // ✅ NEW
 
 
 // Import Message model to save messages

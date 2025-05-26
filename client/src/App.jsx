@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
+
 import Home from './pages/Home';
 import Header from './components/Header';
 import OfferSeat from './pages/OfferSeat';
@@ -12,6 +13,7 @@ import Profile from './pages/Profile';
 // ✅ KYC components
 import KYCForm from './pages/KYCForm';
 import AdminKYC from './pages/AdminKYC';
+import AdminLogin from './pages/AdminLogin'; // ✅ import admin login page
 
 function App() {
   return (
@@ -23,10 +25,11 @@ function App() {
         <Route path="/offer-seat" element={<OfferSeat />} />
         <Route path="/ride/:rideId" element={<RideDetail />} />
         <Route path="/profile" element={<Profile />} />
-        
+
         {/* ✅ KYC routes */}
         <Route path="/kyc" element={<KYCForm />} />
         <Route path="/admin/kyc" element={<AdminKYC />} />
+        <Route path="/admin-login" element={<AdminLogin />} /> {/* ✅ new route */}
 
         <Route path="/*" element={<Error />} />
       </Routes>

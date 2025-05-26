@@ -8,6 +8,7 @@ import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { useContext, useState } from "react";
 import { AuthContext } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const apiUri = import.meta.env.VITE_REACT_API_URI;
@@ -17,22 +18,17 @@ const LoginSignupDialog = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ name: "", email: "", password: "" });
 
+  const navigate = useNavigate();
+
   const handleLogin = async (event) => {
     event.preventDefault();
     dispatch({ type: "LOGIN_START" });
 
     try {
       const res = await axios.post(`${apiUri}/auth/login`, loginData, { withCredentials: true });
-
       const { token, user } = res.data;
 
-      if (token) {
-        localStorage.setItem("token", token);
-        console.log("Login token saved:", token);  // Bonus debug tip
-      } else {
-        console.warn("Token not received from login response");
-      }
-
+      if (token) localStorage.setItem("token", token);
       dispatch({ type: "LOGIN_SUCCESS", payload: { token, user } });
       setLoginData({ email: "", password: "" });
     } catch (err) {
@@ -49,16 +45,9 @@ const LoginSignupDialog = () => {
 
     try {
       const res = await axios.post(`${apiUri}/auth/register`, signupData, { withCredentials: true });
-
       const { token, user } = res.data;
 
-      if (token) {
-        localStorage.setItem("token", token);
-        console.log("Signup token saved:", token);  // Bonus debug tip
-      } else {
-        console.warn("Token not received from signup response");
-      }
-
+      if (token) localStorage.setItem("token", token);
       dispatch({ type: "LOGIN_SUCCESS", payload: { token, user } });
       setSignupData({ name: "", email: "", password: "" });
     } catch (err) {
@@ -69,110 +58,126 @@ const LoginSignupDialog = () => {
     }
   };
 
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button>Login</Button>
-      </DialogTrigger>
-      <DialogContent>
-        <Tabs defaultValue="login">
-          <TabsList className="grid w-full grid-cols-2 my-4">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">SignUp</TabsTrigger>
-          </TabsList>
-          {error && <span className="text-sm text-destructive">{error?.message}</span>}
-          <TabsContent value="login">
-            <form onSubmit={handleLogin}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Login</CardTitle>
-                  <CardDescription>Welcome back</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="space-y-1">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      autoComplete="email"
-                      type="email"
-                      value={loginData.email}
-                      onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      autoComplete="current-password"
-                      type="password"
-                      required
-                      value={loginData.password}
-                      onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button disabled={loading} type="submit">
-                    Log in
-                  </Button>
-                </CardFooter>
-              </Card>
-            </form>
-          </TabsContent>
+  const goToAdminLogin = () => {
+    navigate("/admin-login");
+  };
 
-          <TabsContent value="signup">
-            <form onSubmit={handleSignup}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Signup</CardTitle>
-                  <CardDescription>Create a new account.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="space-y-1">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      autoComplete="name"
-                      value={signupData.name}
-                      required
-                      onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="newemail">Email</Label>
-                    <Input
-                      id="newemail"
-                      autoComplete="email"
-                      type="email"
-                      value={signupData.email}
-                      required
-                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="newpassword">Password</Label>
-                    <Input
-                      id="newpassword"
-                      autoComplete="new-password"
-                      type="password"
-                      required
-                      value={signupData.password}
-                      onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button disabled={loading} type="submit">
-                    Sign up
-                  </Button>
-                </CardFooter>
-              </Card>
-            </form>
-          </TabsContent>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
+  return (
+    <>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>Login</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <Tabs defaultValue="login">
+            <TabsList className="grid w-full grid-cols-2 my-4">
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">SignUp</TabsTrigger>
+            </TabsList>
+
+            {error && <span className="text-sm text-destructive">{error?.message}</span>}
+
+            <TabsContent value="login">
+              <form onSubmit={handleLogin}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Login</CardTitle>
+                    <CardDescription>Welcome back</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="space-y-1">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        autoComplete="email"
+                        type="email"
+                        value={loginData.email}
+                        onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="password">Password</Label>
+                      <Input
+                        id="password"
+                        autoComplete="current-password"
+                        type="password"
+                        required
+                        value={loginData.password}
+                        onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button disabled={loading} type="submit">
+                      Log in
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <form onSubmit={handleSignup}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Signup</CardTitle>
+                    <CardDescription>Create a new account.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="space-y-1">
+                      <Label htmlFor="name">Name</Label>
+                      <Input
+                        id="name"
+                        autoComplete="name"
+                        value={signupData.name}
+                        required
+                        onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="newemail">Email</Label>
+                      <Input
+                        id="newemail"
+                        autoComplete="email"
+                        type="email"
+                        value={signupData.email}
+                        required
+                        onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="newpassword">Password</Label>
+                      <Input
+                        id="newpassword"
+                        autoComplete="new-password"
+                        type="password"
+                        required
+                        value={signupData.password}
+                        onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button disabled={loading} type="submit">
+                      Sign up
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </form>
+            </TabsContent>
+          </Tabs>
+
+          {/* Admin login redirect button */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">Are you an admin?</p>
+            <Button variant="outline" className="mt-2" onClick={goToAdminLogin}>
+              Go to Admin Login
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

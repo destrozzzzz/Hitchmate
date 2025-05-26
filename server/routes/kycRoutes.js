@@ -3,11 +3,11 @@ import { submitKyc, getAllKycs, updateKycStatus } from '../controllers/kycContro
 
 const router = express.Router();
 
-// Allow public KYC submission (no auth)
+// Public KYC submission (no auth)
 router.post('/submit', submitKyc);
 
-// Simple admin password check via query param
-router.get('/all', (req, res, next) => {
+// Admin-only access using query param ?auth=admin123
+router.get('/', (req, res, next) => {
   const adminPassword = req.query.auth;
   if (adminPassword !== 'admin123') {
     return res.status(401).json({ message: 'Unauthorized' });
@@ -15,7 +15,7 @@ router.get('/all', (req, res, next) => {
   getAllKycs(req, res, next);
 });
 
-router.patch('/update/:id', (req, res, next) => {
+router.patch('/:id/status', (req, res, next) => {
   const adminPassword = req.query.auth;
   if (adminPassword !== 'admin123') {
     return res.status(401).json({ message: 'Unauthorized' });
