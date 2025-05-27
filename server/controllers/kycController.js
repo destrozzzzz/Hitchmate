@@ -9,7 +9,7 @@ export const submitKyc = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required.' });
     }
 
-    // Optional duplicate check by ID number
+    // Prevent duplicate ID numbers
     const existing = await Kyc.findOne({ idNumber });
     if (existing) {
       return res.status(400).json({ message: 'KYC with this ID number already submitted.' });
@@ -19,7 +19,8 @@ export const submitKyc = async (req, res) => {
       fullName,
       idNumber,
       photoUrl,
-      userId: 'anonymous-user' // Optional field for traceability
+      userId: 'anonymous-user', // Optional field
+      status: 'pending',
     });
 
     res.status(201).json({ message: 'KYC submitted successfully', data: newKyc });
@@ -32,7 +33,7 @@ export const submitKyc = async (req, res) => {
 // GET /api/kyc
 export const getAllKycs = async (req, res) => {
   try {
-    const kycs = await Kyc.find(); // No populate since userId is a string
+    const kycs = await Kyc.find().sort({ createdAt: -1 });
     res.json(kycs);
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch KYCs', error: err.message });
@@ -54,8 +55,24 @@ export const updateKycStatus = async (req, res) => {
       return res.status(404).json({ message: 'KYC not found.' });
     }
 
-    res.json(updated);
+    res.json({ message: 'KYC status updated', data: updated });
   } catch (err) {
     res.status(500).json({ message: 'Failed to update KYC status', error: err.message });
+  }
+};
+
+// DELETE /api/kyc/:id
+export const deleteKyc = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Kyc.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ message: 'KYC not found.' });
+    }
+
+    res.json({ message: 'KYC deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete KYC', error: err.message });
   }
 };

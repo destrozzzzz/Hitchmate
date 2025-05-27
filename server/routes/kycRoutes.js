@@ -1,26 +1,27 @@
 import express from 'express';
-import { submitKyc, getAllKycs, updateKycStatus } from '../controllers/kycController.js';
+import {
+  submitKyc,
+  getAllKycs,
+  updateKycStatus,
+  deleteKyc
+} from '../controllers/kycController.js';
 
 const router = express.Router();
 
-// Public KYC submission (no auth)
+// Public KYC submission
 router.post('/submit', submitKyc);
 
-// Admin-only access using query param ?auth=admin123
-router.get('/', (req, res, next) => {
-  const adminPassword = req.query.auth;
-  if (adminPassword !== 'admin123') {
+// Admin middleware check
+const adminAuthMiddleware = (req, res, next) => {
+  if (req.query.auth !== 'admin123') {
     return res.status(401).json({ message: 'Unauthorized' });
   }
-  getAllKycs(req, res, next);
-});
+  next();
+};
 
-router.patch('/:id/status', (req, res, next) => {
-  const adminPassword = req.query.auth;
-  if (adminPassword !== 'admin123') {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-  updateKycStatus(req, res, next);
-});
+// Admin routes
+router.get('/', adminAuthMiddleware, getAllKycs);
+router.patch('/:id/status', adminAuthMiddleware, updateKycStatus);
+router.delete('/:id', adminAuthMiddleware, deleteKyc);
 
 export default router;
