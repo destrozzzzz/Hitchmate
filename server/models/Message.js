@@ -1,16 +1,13 @@
 import mongoose from 'mongoose';
 
-// Define the Message schema
 const messageSchema = new mongoose.Schema(
   {
     rideId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Ride', // Reference to the Ride model
+      type: String, // Use string to match rideId passed from frontend
       required: true,
     },
     sender: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // Reference to the User model
+      type: String, // Store sender as plain string for simplicity
       required: true,
     },
     text: {
@@ -19,11 +16,10 @@ const messageSchema = new mongoose.Schema(
     },
     timestamp: {
       type: Date,
-      default: Date.now, // Default to the current date/time
+      default: Date.now,
     },
   },
-  { timestamps: true } // Automatically adds createdAt and updatedAt fields
+  { timestamps: true }
 );
 
-// Create and export the Message model based on the schema
 export default mongoose.model('Message', messageSchema);

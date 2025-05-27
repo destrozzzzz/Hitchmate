@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('http://localhost:5000'); // Update if your server is hosted elsewhere
+const socket = io('http://localhost:5000'); // change if deployed
 
 function Chat({ rideId }) {
   const [message, setMessage] = useState('');
@@ -9,42 +9,39 @@ function Chat({ rideId }) {
   const [username, setUsername] = useState('');
   const messageEndRef = useRef(null);
 
-  // Join room and fetch chat history
   useEffect(() => {
     if (!rideId) return;
 
     socket.emit('join_room', rideId);
     fetchMessages();
 
-    socket.on('receive_message', (msg) => {
+    const handleReceive = (msg) => {
       setMessages((prev) => [...prev, msg]);
-    });
+    };
+
+    socket.on('receive_message', handleReceive);
 
     return () => {
-      socket.off('receive_message');
+      socket.off('receive_message', handleReceive);
     };
   }, [rideId]);
 
-  // Fetch chat history from server
   const fetchMessages = async () => {
     try {
       const res = await fetch(`http://localhost:5000/api/messages/${rideId}/messages`);
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
-      setMessages(data); // Assumes server returns an array of messages
+      setMessages(data);
     } catch (err) {
-      console.error('Failed to fetch chat history:', err.message);
+      console.error('Error fetching messages:', err);
     }
   };
 
-  // Auto-scroll to the bottom when messages update
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Send a message
   const handleSendMessage = () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !rideId) return;
 
     const senderName = username.trim() || 'Guest';
 
@@ -54,13 +51,8 @@ function Chat({ rideId }) {
       text: message,
     };
 
+    // Emit and persist once — backend handles broadcasting
     socket.emit('send_message', messageData);
-
-    // Optimistically add message to chat
-    setMessages((prev) => [
-      ...prev,
-      { ...messageData, timestamp: new Date().toISOString() },
-    ]);
 
     setMessage('');
   };
@@ -76,7 +68,7 @@ function Chat({ rideId }) {
               <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.3rem' }}>
                 <strong>{msg.sender}</strong>
                 <small style={{ marginLeft: '0.5rem', color: '#666' }}>
-                  {new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
+                  {new Date(msg.timestamp).toLocaleTimeString()}
                 </small>
               </div>
               <div style={{ backgroundColor: '#e3f2fd', padding: '0.7rem', borderRadius: '10px', maxWidth: '80%' }}>
@@ -88,21 +80,19 @@ function Chat({ rideId }) {
         <div ref={messageEndRef} />
       </div>
 
-      {!username && (
-        <input
-          type="text"
-          placeholder="Enter your name (optional)"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={{
-            marginTop: '10px',
-            padding: '10px',
-            borderRadius: '8px',
-            border: '1px solid #ccc',
-            width: '100%',
-          }}
-        />
-      )}
+      <input
+        type="text"
+        placeholder="Enter your name (optional)"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)} // fixed input handler
+        style={{
+          marginTop: '10px',
+          padding: '10px',
+          borderRadius: '8px',
+          border: '1px solid #ccc',
+          width: '100%',
+        }}
+      />
 
       <div style={{ display: 'flex', marginTop: '10px' }}>
         <input
