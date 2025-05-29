@@ -9,44 +9,40 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Form, FormControl, FormField, FormItem } from "./ui/form";
 import { CalendarIcon, MapPin, Minus, Plus, User } from "lucide-react";
 import { Input } from "./ui/input";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 
 const searchSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  seat: z.number().min(1).max(10),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  seat: z.coerce.number().min(1).max(10),
   date: z.date().nullable(),
 });
 
 const Search = () => {
-  const [searchParams, setSearchParams] = useSearchParams({
-    from: "",
-    to: "",
-    seat: "1",
-    date: "",
-  });
+  const navigate = useNavigate();
 
   const form = useForm({
     resolver: zodResolver(searchSchema),
     defaultValues: {
-      from: searchParams.get("from") || "",
-      to: searchParams.get("to") || "",
-      seat: parseInt(searchParams.get("seat")) || 1,
-      date: searchParams.get("date") ? new Date(searchParams.get("date")) : null,
+      from: "",
+      to: "",
+      seat: 1,
+      date: null,
     },
   });
 
   const { watch, reset } = form;
 
   const onSubmit = (data) => {
-    const query = {
+    const query = new URLSearchParams({
       from: data.from || "",
       to: data.to || "",
       seat: String(data.seat),
       date: data.date ? data.date.toISOString().split("T")[0] : "",
-    };
-    setSearchParams(query);
+    }).toString();
+
+    navigate(`/search?${query}`);
   };
 
   const onClear = () => {
@@ -56,14 +52,11 @@ const Search = () => {
       seat: 1,
       date: null,
     });
-    setSearchParams({});
+    navigate("/search"); // or navigate("/") if you want to clear back to homepage
   };
 
-  // Optional: React to search param changes (e.g. for syncing back from URL)
   useEffect(() => {
-    const subscription = watch((value) => {
-      // Live watch effect if needed
-    });
+    const subscription = watch(() => {});
     return () => subscription.unsubscribe();
   }, [watch]);
 
@@ -115,7 +108,6 @@ const Search = () => {
 
         {/* DATE + SEAT */}
         <div className="flex justify-between">
-          {/* DATE */}
           <FormField
             control={form.control}
             name="date"
@@ -155,7 +147,6 @@ const Search = () => {
             )}
           />
 
-          {/* SEATS */}
           <FormField
             control={form.control}
             name="seat"
